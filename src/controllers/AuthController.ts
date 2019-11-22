@@ -16,11 +16,12 @@ class AuthController {
             .getOne();
 
         if (user) {
-            const token = jwt.sign(
-                { userId: user.id, username: user.email },
-                config.jwtSecret,
-                { expiresIn: "1h" }
-            );
+            const payload = {
+                check:  true
+            };
+            const token = jwt.sign(payload, config.jwtSecret, {
+                expiresIn: 14400
+            });
             res.status(200).send(token);
         } else {
             res.status(200).send('no existe');
@@ -29,18 +30,30 @@ class AuthController {
 
     public async changePassword(req: Request, res: Response) {
         const entityManager = getManager();
-        const {oldpassword,newpassword} = req.params;
-        const id = res.locals.jwtPayload.userId;
+        const {email,oldPassword,newPassword} = req.body;
 
-        const user = await entityManager
+        const checkPassword = await entityManager
             .createQueryBuilder(User, "user")
-            .where("user.password = :password", {password: newpassword })
+            .where("user.email = :email AND user.password = :oldPassword", { email: email, oldPassword: oldPassword })
             .getOne();
 
-        if (user) {
-            res.status(200).send(user);
+        let updateUser;
+
+        if(checkPassword){
+            updateUser = await entityManager
+                .createQueryBuilder()
+                .update(User)
+                .set({ password: newPassword})
+                .where("email = :email", { email: email })
+                .execute();
+        }else{
+            updateUser = false;
+        }
+
+        if (updateUser) {
+            res.status(200).send("Contaseña cambiada");
         } else {
-            res.status(200).send('no existe');
+            res.status(200).send('No se pudo cambiar');
         }
     }
 

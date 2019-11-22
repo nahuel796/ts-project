@@ -2,6 +2,8 @@ import {Express} from 'express';
 import bodyParser = require('body-parser');
 import UserRoutes from './UserRoutes';
 import AuthRoutes from './AuthRoutes';
+import BlogRoutes from './BlogRoutes';
+import CategoryRoutes from './CategoryRoutes';
 
 class Router {
 
@@ -21,6 +23,8 @@ class Router {
 
         this.express.use('/user', new UserRoutes().express);
         this.express.use('/auth', new AuthRoutes().express);
+        this.express.use('/blog', new BlogRoutes().express);
+        this.express.use('/category', new CategoryRoutes().express);
     }
 
 }
